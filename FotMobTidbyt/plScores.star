@@ -16,9 +16,11 @@ def main(config):
         fail("FotMob Transfers request failed with status %d", transfersByLeague.status_code)
 
     allTransfers = transfersByLeague.json()["transfers"]["data"]
-    currentTransfer = allTransfers[4] # TODO: iterate over all transfers 
+    currentTransfer = allTransfers[0] # TODO: iterate over all transfers 
 
     playerName = currentTransfer["name"]
+    formattedPlayerName = formatPlayerName(playerName)
+    transferDate = currentTransfer["transferDate"]
     fromClubId = currentTransfer["fromClubId"]
     fromClubName = currentTransfer["fromClub"]
     toClubId = currentTransfer["toClubId"]
@@ -34,16 +36,16 @@ def main(config):
             render.Column(
                 children = [
                     render.Row(
+                        expanded=True,
+                        main_align = "center",
+                        cross_align = "center",
                         children=[
-                            render.Marquee(
-                                width=70,
-                                child=render.Text("%s " % playerName)
-                            )
+                            render.Text("%s" % formattedPlayerName)
                         ]
                     ),
                     render.Row(
                         expanded=True, # Use as much horizontal space as possible
-                        main_align="space_evenly", # Controls horizontal alignment
+                        main_align="center", # Controls horizontal alignment
                         cross_align="center",
                         children=[
                             render.Animation(
@@ -71,7 +73,9 @@ def main(config):
                         children=[
                             render.Marquee(
                                 width=64,
-                                child=render.Text(" %s has transfered from %s to %s %s" % (playerName, fromClubName, toClubName, transferFeeStatement)),
+                                offset_start=5,
+                                offset_end=32,
+                                child=render.Text("%s: %s has transfered from %s to %s %s" % (transferDate, playerName, fromClubName, toClubName, transferFeeStatement)),
                             )
                         ],
                     )
@@ -80,8 +84,24 @@ def main(config):
         ),
     )
 
+
+def formatPlayerName(playerName):
+    nameList = playerName.split(" ", 1)
+    firstInitial = nameList[0][0]
+    lastName = nameList[1]
+
+    if len(lastName) > 9: # shorten long last names
+        lastName = "%s..." % lastName[:8]
+
+    formattedName = "%s. %s" % (firstInitial, lastName)
+    return formattedName
+
 def getTransferFeeStatement(currentTransfer):
+    if currentTransfer["fee"] == None:
+        return "" 
+
     transferType = currentTransfer["fee"]["localizedFeeText"]
+
     if transferType == "transfer_type_free_transfer":
         return "on a free transfer."
     if transferType == "on_loan":
@@ -89,6 +109,5 @@ def getTransferFeeStatement(currentTransfer):
     if transferType == "transfer_fee":
         transferValue = currentTransfer["fee"]["value"]
         return "for a fee of %s." % transferValue
-    return "" # if there is no type here, just return empty string
-
-
+    return ""
+        
