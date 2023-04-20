@@ -1,14 +1,17 @@
+load("cache.star", "cache")
 load("http.star", "http")
+load("encoding/json.star", "json")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 
 DEFAULT_LEAGUE = "47"
 FOTMOB_BASE_URL = "https://www.fotmob.com/api/"
+CACHE_TTL_SECONDS = 900
 
 def main(config):
     allTransfers = getTransfersByLeague(config)
-    currentTransferIndex = random.number(0,20)
+    currentTransferIndex = random.number(0,len(allTransfers)-1)
     currentTransfer = allTransfers[currentTransferIndex]
     transferDetails = getTransferDetails(currentTransfer)
 
@@ -66,17 +69,14 @@ def main(config):
     )
 
 def getTransfersByLeague(config):
-
     league = config.get("league", DEFAULT_LEAGUE) 
     transfersUrlAppend = "leagues?id=%s&tab=transfers&type=team&timeZone=Americe/New_York" % league
     fotMobUrl = FOTMOB_BASE_URL + transfersUrlAppend
 
-    transfersByLeague = http.get(fotMobUrl) # TODO: Add caching daily
     
-    if transfersByLeague.status_code != 200:
-        fail("FotMob Transfers request failed with status %d", transfersByLeague.status_code)
-
-    return transfersByLeague.json()["transfers"]["data"]
+    data = get_cachable_data(fotMobUrl)
+    transfersByLeague = json.decode(data)["transfers"]["data"]
+    return transfersByLeague
 
 def getTransferDetails(currentTransfer):
   return {
@@ -95,16 +95,18 @@ def getTransferDetails(currentTransfer):
 def formatPlayerName(playerName):
     nameList = playerName.split(" ", 1)
     
-    if len(nameList) > 1:
-        firstInitial = nameList[0][0]
-        lastName = nameList[1]
-        if len(lastName) > 9: # shorten long last names
-            lastName = "%s..." % lastName[:8]
-
-        formattedName = "%s. %s" % (firstInitial, lastName)
-        return formattedName
-    else:
+    if len(nameList) < 1: # only one name 
         return playerName
+    
+    firstInitial = nameList[0][0]
+    lastName = nameList[1]
+
+    if len(lastName) > 9: # shorten long last names
+        lastName = "%s..." % lastName[:8]
+    
+    formattedName = "%s. %s" % (firstInitial, lastName)
+    return formattedName
+    
 
 def getClubLogo(clubId):
     logo = http.get("https://images.fotmob.com/image_resources/logo/teamlogo/%d.png" % clubId).body()
@@ -198,4 +200,18 @@ def get_schema():
             )
         ]
     )
-        
+
+def get_cachable_data(url):
+    key = url
+
+    data = cache.get(key)
+    if data != None:
+        return data
+
+    res = http.get(url = url)
+    if res.status_code != 200:
+        fail("request to %s failed with status code: %d - %s" % (url, res.status_code, res.body()))
+
+    cache.set(key, res.body(), CACHE_TTL_SECONDS)
+
+    return res.body()
