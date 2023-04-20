@@ -1,22 +1,14 @@
 load("render.star", "render")
 load("http.star", "http")
+load("random.star", "random")
 
 FOTMOB_BASE_URL = "https://www.fotmob.com/api/"
 
 def main(config):
+    allTransfers = getTransfersByLeague(config)
 
-    # TODO: Condense this url generation code 
-    # league = config.get("leagueId", "47") # TODO: add config
-    transfersUrlAppend = "leagues?id=47&tab=transfers&type=team%timeZone=Americe/New_York" # TODO: make configurable
-    fotMobUrl = FOTMOB_BASE_URL + transfersUrlAppend
-
-    transfersByLeague = http.get(fotMobUrl) # TODO: Add caching daily
-    
-    if transfersByLeague.status_code != 200:
-        fail("FotMob Transfers request failed with status %d", transfersByLeague.status_code)
-
-    allTransfers = transfersByLeague.json()["transfers"]["data"]
-    currentTransfer = allTransfers[0] # TODO: iterate over all transfers 
+    currentTransferIndex = random.number(0,10)
+    currentTransfer = allTransfers[currentTransferIndex] # TODO: iterate over all transfers 
 
     playerName = currentTransfer["name"]
     formattedPlayerName = formatPlayerName(playerName)
@@ -84,6 +76,18 @@ def main(config):
         ),
     )
 
+def getTransfersByLeague(config):
+    # TODO: Condense this url generation code 
+    # league = config.get("leagueId", "47") # TODO: add config
+    transfersUrlAppend = "leagues?id=47&tab=transfers&type=team%timeZone=Americe/New_York" # TODO: make configurable
+    fotMobUrl = FOTMOB_BASE_URL + transfersUrlAppend
+
+    transfersByLeague = http.get(fotMobUrl) # TODO: Add caching daily
+    
+    if transfersByLeague.status_code != 200:
+        fail("FotMob Transfers request failed with status %d", transfersByLeague.status_code)
+
+    return transfersByLeague.json()["transfers"]["data"]
 
 def formatPlayerName(playerName):
     nameList = playerName.split(" ", 1)
