@@ -1,12 +1,14 @@
-load("render.star", "render")
 load("http.star", "http")
 load("random.star", "random")
+load("render.star", "render")
+load("schema.star", "schema")
 
+DEFAULT_LEAGUE = "47"
 FOTMOB_BASE_URL = "https://www.fotmob.com/api/"
 
 def main(config):
     allTransfers = getTransfersByLeague(config)
-    currentTransferIndex = random.number(1,50)
+    currentTransferIndex = random.number(0,20)
     currentTransfer = allTransfers[currentTransferIndex]
     transferDetails = getTransferDetails(currentTransfer)
 
@@ -64,9 +66,9 @@ def main(config):
     )
 
 def getTransfersByLeague(config):
-    # TODO: Condense this url generation code 
-    # league = config.get("leagueId", "47") # TODO: add config
-    transfersUrlAppend = "leagues?id=87&tab=transfers&type=team%timeZone=Americe/New_York" # TODO: make configurable
+
+    league = config.get("league", DEFAULT_LEAGUE) 
+    transfersUrlAppend = "leagues?id=%s&tab=transfers&type=team&timeZone=Americe/New_York" % league
     fotMobUrl = FOTMOB_BASE_URL + transfersUrlAppend
 
     transfersByLeague = http.get(fotMobUrl) # TODO: Add caching daily
@@ -139,5 +141,61 @@ def getTransferFeeStatement(transferDetails):
         return " on loan."
     if transferType == "transfer_fee":
         transferValue = transferDetails["fee"]["value"]
-        return " for a fee of %s." % transferValue
+        return " for %s." % transferValue
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Dropdown(
+                id = "league",
+                name = "League",
+                desc = "Select which league's transfers to display",
+                icon = "futbol",
+                default = "47",
+                options = [
+                    schema.Option(
+                        display = "Premier League",
+                        value = "47",
+                    ),
+                    schema.Option(
+                        display = "La Liga",
+                        value = "87"
+                    ),
+                    schema.Option(
+                        display = "Bundesliga",
+                        value = "54",
+                    ),
+                    schema.Option(
+                        display = "Serie A",
+                        value = "55",
+                    ),
+                    schema.Option(
+                        display = "Ligue 1",
+                        value = "53",
+                    ),
+                    schema.Option(
+                        display = "Liga Portugal",
+                        value = "61",
+                    ),
+                    schema.Option(
+                        display = "Eredivisie",
+                        value = "57",
+                    ),
+                    schema.Option(
+                        display = "Serie A (Brazil)",
+                        value = "268",
+                    ),
+                    schema.Option(
+                        display = "MLS",
+                        value = "130",
+                    ),
+                    schema.Option(
+                        display = "Championship",
+                        value = "48",
+                    ),
+                ],
+            )
+        ]
+    )
         
