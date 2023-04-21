@@ -1,3 +1,10 @@
+"""
+Applet: SoccerTransferNews
+Summary: Displays men's soccer transfers from 10 leagues around the world
+Description: Displays live Transfer News from around the world. 
+Author: atylicki9
+"""
+
 load("cache.star", "cache")
 load("http.star", "http")
 load("encoding/json.star", "json")
@@ -16,8 +23,11 @@ def main(config):
     transferDetails = getTransferDetails(currentTransfer)
 
     return render.Root(
+        show_full_animation	= True,
         child = render.Box( 
             render.Column(
+                expanded = True,
+                main_align="space_between",
                 children = [
                     render.Row(
                         expanded=True,
@@ -41,7 +51,7 @@ def main(config):
                                     ),
                                 ],
                             ),
-                            render.Text(" --> "),
+                            render.Text(" -> "),
                             render.Animation(
                                 children = [
                                     render.Image(
@@ -55,12 +65,13 @@ def main(config):
                     ),
                     render.Row(
                         children=[
-                            render.Marquee(
+                            render.Box(color ="#8b0000", height = 10,
+                            child = render.Marquee(
                                 width=64,
-                                offset_start = 10,
-                                offset_end = 5,
+                                offset_start = 64,
+                                offset_end = 64,
                                 child = render.Text(getTransferStatement(transferDetails))
-                            )
+                            ))
                         ],
                     )
                 ],
@@ -95,7 +106,7 @@ def getTransferDetails(currentTransfer):
 def formatPlayerName(playerName):
     nameList = playerName.split(" ", 1)
     
-    if len(nameList) < 1: # only one name 
+    if len(nameList) < 2: # only one name 
         return playerName
     
     firstInitial = nameList[0][0]
@@ -119,16 +130,16 @@ def getTransferStatement(transferDetails):
     if transferDetails["fromClubName"] == "Free agent":
         return "%s: %s has been signed by %s." % ( 
                                             transferDetails["transferDate"], 
-                                            transferDetails["formattedPlayerName"], 
+                                            transferDetails["playerName"], 
                                             transferDetails["toClubName"])
     if  transferDetails["toClubName"] == "Free agent":
         return "%s: %s has been dropped by %s." % ( 
                                             transferDetails["transferDate"], 
-                                            transferDetails["formattedPlayerName"], 
+                                            transferDetails["playerName"], 
                                             transferDetails["fromClubName"])
     return "%s: %s signs for %s from %s%s" % ( 
                                             transferDetails["transferDate"], 
-                                            transferDetails["formattedPlayerName"], 
+                                            transferDetails["playerName"], 
                                             transferDetails["toClubName"], 
                                             transferDetails["fromClubName"], 
                                             transferDetails["transferFeeStatement"])
@@ -185,16 +196,84 @@ def get_schema():
                         value = "57",
                     ),
                     schema.Option(
+                        display = "Liga Profesional (Argentina)",
+                        value = "112",
+                    ),
+                    schema.Option(
+                        display = "A-League (Australia)",
+                        value = "113",
+                    ),
+                    schema.Option(
+                        display = "Austrian Bundesliga",
+                        value = "38",
+                    ),
+                    schema.Option(
+                        display = "Belgian Pro League",
+                        value = "40",
+                    ),
+                    schema.Option(
                         display = "Serie A (Brazil)",
                         value = "268",
+                    ),
+                    schema.Option(
+                        display = "Canadian Premier League",
+                        value = "9986",
+                    ),
+                    schema.Option(
+                        display = "Chinese Super League",
+                        value = "120",
+                    ),
+                    schema.Option(
+                        display = "HNL (Croatia)",
+                        value = "252",
+                    ),
+                    schema.Option(
+                        display = "Superligaen (Denmark)",
+                        value = "46",
+                    ),
+                    schema.Option(
+                        display = "Championship (England)",
+                        value = "48",
+                    ),
+                    schema.Option(
+                        display = "League One (England)",
+                        value = "108",
+                    ),
+                    schema.Option(
+                        display = "League Two (England)",
+                        value = "109",
+                    ),
+                    schema.Option(
+                        display = "Irish Premier Division",
+                        value = "126",
+                    ),
+                    schema.Option(
+                        display = "Liga MX",
+                        value = "230",
+                    ),
+                    schema.Option(
+                        display = "Eliteserien (Norway)",
+                        value = "59",
+                    ),
+                    schema.Option(
+                        display = "Saudi Pro League",
+                        value = "536",
+                    ),
+                    schema.Option(
+                        display = "Scottish Premiership",
+                        value = "64",
+                    ),
+                    schema.Option(
+                        display = "Super Lig (Turkey)",
+                        value = "71",
                     ),
                     schema.Option(
                         display = "MLS",
                         value = "130",
                     ),
                     schema.Option(
-                        display = "Championship",
-                        value = "48",
+                        display = "USL Championship",
+                        value = "8972",
                     ),
                 ],
             )
