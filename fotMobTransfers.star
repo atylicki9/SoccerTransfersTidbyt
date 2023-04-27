@@ -1,8 +1,7 @@
 """
 Applet: SoccerTransferNews
-Summary: Displays men's soccer transfers from 10 leagues around the world
+Summary: Displays men's soccer transfers from 20+ leagues around the world
 Description: Displays live Transfer News from around the world. 
-Author: atylicki9
 """
 
 load("cache.star", "cache")
@@ -15,6 +14,10 @@ load("schema.star", "schema")
 DEFAULT_LEAGUE = "47"
 FOTMOB_BASE_URL = "https://www.fotmob.com/api/"
 CACHE_TTL_SECONDS = 900
+
+LOGO_DIMENSIONS = 10
+TIDBYT_WIDTH = 64
+TIDBYT_HEIGHT = 32
 
 def main(config):
     allTransfers = getTransfersByLeague(config)
@@ -46,8 +49,8 @@ def main(config):
                                 children = [
                                     render.Image(
                                         src = transferDetails["fromClubLogo"],
-                                        width = 10,
-                                        height = 10,
+                                        width = LOGO_DIMENSIONS,
+                                        height = LOGO_DIMENSIONS,
                                     ),
                                 ],
                             ),
@@ -56,8 +59,8 @@ def main(config):
                                 children = [
                                     render.Image(
                                         src = transferDetails["toClubLogo"],
-                                        width = 10,
-                                        height = 10,
+                                        width = LOGO_DIMENSIONS,
+                                        height = LOGO_DIMENSIONS,
                                     ),
                                 ],
                             ),
@@ -67,9 +70,9 @@ def main(config):
                         children=[
                             render.Box(color ="#8b0000", height = 10,
                             child = render.Marquee(
-                                width=64,
-                                offset_start = 64,
-                                offset_end = 64,
+                                width=TIDBYT_WIDTH,
+                                offset_start = TIDBYT_WIDTH,
+                                offset_end = TIDBYT_WIDTH,
                                 child = render.Text(getTransferStatement(transferDetails))
                             ))
                         ],
@@ -84,7 +87,6 @@ def getTransfersByLeague(config):
     transfersUrlAppend = "leagues?id=%s&tab=transfers&type=team&timeZone=Americe/New_York" % league
     fotMobUrl = FOTMOB_BASE_URL + transfersUrlAppend
 
-    
     data = get_cachable_data(fotMobUrl)
     transfersByLeague = json.decode(data)["transfers"]["data"]
     return transfersByLeague
