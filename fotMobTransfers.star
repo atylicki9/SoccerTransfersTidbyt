@@ -95,7 +95,7 @@ def getTransferDetails(currentTransfer):
   return {
     "playerName": currentTransfer["name"],
     "formattedPlayerName": formatPlayerName(currentTransfer["name"]),
-    "transferDate": currentTransfer["transferDate"],
+    "transferDate": currentTransfer["transferDate"].split("T")[0],
     "fromClubId":  currentTransfer["fromClubId"],
     "fromClubName": currentTransfer["fromClub"],
     "toClubId": currentTransfer["toClubId"],
