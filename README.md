@@ -1,4 +1,4 @@
-# SoccerTransferNews
+# SoccerTransfersTidbyt
 This is a Tidbyt app for displaying Soccer Transfers using the Fotmob API. 
 The display will include Player name, team logos, and news ticker explaining with a quick writeup explaining 
 where each player is moving to, what the transfer fee is, and the type of deal being made. 
